@@ -12,6 +12,8 @@ lightgbm
 scikit-learn
 pandas
 numpy
+scipy
+joblib
 
 # Computer Vision & OCR
 pytesseract
@@ -23,8 +25,10 @@ torchvision
 python-multipart 
 python-dotenv
 
-
 passlib
 bcrypt
 PyJWT
 email-validator
+
+# Rule Engine
+pyyaml
