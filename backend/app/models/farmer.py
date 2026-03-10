@@ -31,6 +31,7 @@ class FarmerProfile(BaseModel):
     farmer_type: Optional[str] = Field(None, example="Small")
     irrigation_type: Optional[str] = Field(None, example="Rainfed")
     primary_crops: List[str] = Field(default=[])
+    preferred_language: str = Field(default="en", description="User's preferred UI language")
     
     documents_uploaded: List[str] = Field(default=[])
 

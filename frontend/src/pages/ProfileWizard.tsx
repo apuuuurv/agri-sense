@@ -8,12 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { toast } from 'sonner';
-import { Loader2, CheckCircle, Upload, MapPin, Tractor, User } from 'lucide-react';
+import { Loader2, CheckCircle, Upload, Tractor, User } from 'lucide-react';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { useTranslationText } from '@/hooks/useTranslationText';
 
 export default function ProfileWizard() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslationText();
 
   // State matching your Backend Model
   const [profile, setProfile] = useState({
@@ -37,10 +40,10 @@ export default function ProfileWizard() {
         land_size_hectares: parseFloat(profile.land_size_hectares),
         primary_crops: profile.primary_crops.split(',').map(c => c.trim())
       });
-      toast.success("Profile details saved!");
+      toast.success(t('wizard.toast_success'));
       setStep(3); // Move to uploads
     } catch (err: any) {
-      toast.error("Failed to save details");
+      toast.error(t('wizard.toast_fail'));
     } finally {
       setLoading(false);
     }
@@ -48,17 +51,17 @@ export default function ProfileWizard() {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, docType: string) => {
     if (!e.target.files?.[0]) return;
-    
+
     const formData = new FormData();
     formData.append('file', e.target.files[0]);
     formData.append('doc_type', docType);
 
     try {
-      toast.info(`Uploading ${docType}...`);
+      toast.info(t('common.loading'));
       await api.post('/upload/', formData);
-      toast.success(`${docType} uploaded successfully!`);
+      toast.success(t('dashboard.toast_upload_success', { type: docType }));
     } catch (err) {
-      toast.error(`Upload failed for ${docType}`);
+      toast.error(t('dashboard.toast_upload_failed'));
     }
   };
 
@@ -68,46 +71,51 @@ export default function ProfileWizard() {
         {/* Progress Tracker */}
         <div className="space-y-2">
           <div className="flex justify-between text-sm font-medium">
-            <span>Step {step} of 3</span>
-            <span>{step === 1 ? 'Personal info' : step === 2 ? 'Farm Details' : 'Verification'}</span>
+            <span>{t('wizard.step_x_of_y', { current: step, total: 3 })}</span>
+            <span>{step === 1 ? t('wizard.step_personal') : step === 2 ? t('wizard.step_farm') : t('wizard.step_verification')}</span>
           </div>
           <Progress value={(step / 3) * 100} className="h-2 bg-emerald-100" />
         </div>
 
         <Card className="shadow-xl border-none">
-          <CardHeader className="bg-emerald-600 text-white rounded-t-xl">
-            <CardTitle className="flex items-center gap-2">
-              {step === 1 && <User />}
-              {step === 2 && <Tractor />}
-              {step === 3 && <Upload />}
-              Complete Your Farmer Profile
-            </CardTitle>
-            <CardDescription className="text-emerald-100">
-              This information helps our AI find the best schemes for you.
-            </CardDescription>
+          <CardHeader className="bg-emerald-600 text-white rounded-t-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                {step === 1 && <User />}
+                {step === 2 && <Tractor />}
+                {step === 3 && <Upload />}
+                {t('wizard.title')}
+              </CardTitle>
+              <CardDescription className="text-emerald-100 mt-1">
+                {t('wizard.subtitle')}
+              </CardDescription>
+            </div>
+            <div className="bg-white dark:bg-slate-900 rounded-lg">
+              <LanguageSwitcher />
+            </div>
           </CardHeader>
-          
+
           <CardContent className="pt-8">
             {/* STEP 1: PERSONAL & LOCATION */}
             {step === 1 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label>Phone Number</Label>
-                  <Input placeholder="+91 ..." value={profile.phone_number} onChange={e => setProfile({...profile, phone_number: e.target.value})} />
+                  <Label>{t('form.phone')}</Label>
+                  <Input placeholder="+91 ..." value={profile.phone_number} onChange={e => setProfile({ ...profile, phone_number: e.target.value })} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Age</Label>
-                  <Input type="number" value={profile.age} onChange={e => setProfile({...profile, age: e.target.value})} />
+                  <Label>{t('form.age')}</Label>
+                  <Input type="number" value={profile.age} onChange={e => setProfile({ ...profile, age: e.target.value })} />
                 </div>
                 <div className="space-y-2">
-                  <Label>State</Label>
-                  <Input placeholder="e.g. Maharashtra" value={profile.state} onChange={e => setProfile({...profile, state: e.target.value})} />
+                  <Label>{t('form.state')}</Label>
+                  <Input placeholder={t('form.state_placeholder')} value={profile.state} onChange={e => setProfile({ ...profile, state: e.target.value })} />
                 </div>
                 <div className="space-y-2">
-                  <Label>District</Label>
-                  <Input placeholder="e.g. Pune" value={profile.district} onChange={e => setProfile({...profile, district: e.target.value})} />
+                  <Label>{t('form.district')}</Label>
+                  <Input placeholder={t('form.district_placeholder')} value={profile.district} onChange={e => setProfile({ ...profile, district: e.target.value })} />
                 </div>
-                <Button className="md:col-span-2 bg-emerald-600" onClick={() => setStep(2)}>Next: Farm Details</Button>
+                <Button className="md:col-span-2 bg-emerald-600" onClick={() => setStep(2)}>{t('wizard.next_farm')}</Button>
               </div>
             )}
 
@@ -115,28 +123,28 @@ export default function ProfileWizard() {
             {step === 2 && (
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <Label>Farmer Category</Label>
-                  <Select onValueChange={(v) => setProfile({...profile, category: v})}>
-                    <SelectTrigger><SelectValue placeholder="Select Category" /></SelectTrigger>
+                  <Label>{t('form.category')}</Label>
+                  <Select onValueChange={(v) => setProfile({ ...profile, category: v })}>
+                    <SelectTrigger><SelectValue placeholder={t('common.select')} /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="General">General</SelectItem>
-                      <SelectItem value="OBC">OBC</SelectItem>
-                      <SelectItem value="SC/ST">SC / ST</SelectItem>
+                      <SelectItem value="General">{t('form.general')}</SelectItem>
+                      <SelectItem value="OBC">{t('form.obc')}</SelectItem>
+                      <SelectItem value="SC/ST">{t('form.sc')} / {t('form.st')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Land Size (Hectares)</Label>
-                  <Input type="number" step="0.1" value={profile.land_size_hectares} onChange={e => setProfile({...profile, land_size_hectares: e.target.value})} />
+                  <Label>{t('form.land_size')}</Label>
+                  <Input type="number" step="0.1" value={profile.land_size_hectares} onChange={e => setProfile({ ...profile, land_size_hectares: e.target.value })} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Primary Crops (Comma separated)</Label>
-                  <Input placeholder="Wheat, Rice, Cotton" value={profile.primary_crops} onChange={e => setProfile({...profile, primary_crops: e.target.value})} />
+                  <Label>{t('form.crops')}</Label>
+                  <Input placeholder={t('form.crops_placeholder') || "Wheat, Rice"} value={profile.primary_crops} onChange={e => setProfile({ ...profile, primary_crops: e.target.value })} />
                 </div>
                 <div className="flex gap-4">
-                  <Button variant="outline" onClick={() => setStep(1)}>Back</Button>
+                  <Button variant="outline" onClick={() => setStep(1)}>{t('wizard.back')}</Button>
                   <Button className="flex-1 bg-emerald-600" onClick={updateProfile} disabled={loading}>
-                    {loading ? <Loader2 className="animate-spin" /> : 'Save & Continue'}
+                    {loading ? <Loader2 className="animate-spin" /> : t('wizard.save_continue')}
                   </Button>
                 </div>
               </div>
@@ -146,19 +154,19 @@ export default function ProfileWizard() {
             {step === 3 && (
               <div className="space-y-8 text-center">
                 <div className="grid gap-4">
-                  {['Aadhar Card', 'PAN Card', 'Land Receipt'].map((doc) => (
+                  {[t('form.doc_aadhar'), t('form.doc_pan'), t('form.doc_land')].map((doc) => (
                     <div key={doc} className="flex items-center justify-between p-4 border rounded-lg bg-slate-50">
                       <span className="font-medium">{doc}</span>
-                      <Input 
-                        type="file" 
-                        className="w-auto" 
-                        onChange={(e) => handleFileUpload(e, doc.toLowerCase().replace(' ', '_'))} 
+                      <Input
+                        type="file"
+                        className="w-auto"
+                        onChange={(e) => handleFileUpload(e, doc.toLowerCase().replace(' ', '_'))}
                       />
                     </div>
                   ))}
                 </div>
                 <Button className="w-full bg-emerald-600 h-12 text-lg" onClick={() => navigate('/dashboard')}>
-                  Go to Dashboard <CheckCircle className="ml-2" />
+                  {t('wizard.go_dashboard')} <CheckCircle className="ml-2" />
                 </Button>
               </div>
             )}

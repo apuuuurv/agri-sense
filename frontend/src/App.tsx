@@ -5,7 +5,8 @@ import AuthPage from './pages/AuthPage';
 import ProfileWizard from './pages/ProfileWizard';
 import Dashboard from './pages/Dashboard';
 import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "@/components/theme-provider"; // <-- Imported ThemeProvider
+import { ThemeProvider } from "@/components/theme-provider";
+import { Navbar } from "@/components/Navbar";
 
 function App() {
   return (
@@ -14,16 +15,17 @@ function App() {
       <Router>
         {/* Sonner Toaster must be inside the Router provider */}
         <Toaster position="top-center" richColors closeButton />
-        
+        <Navbar />
+
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/auth" element={<AuthPage />} />
-          
+
           {/* Farmer Workflow Routes */}
           <Route path="/profile-setup" element={<ProfileWizard />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          
+
           {/* Catch-all: Redirect to Landing */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
