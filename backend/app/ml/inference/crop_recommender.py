@@ -19,4 +19,4 @@ class CropRecommender:
 
         crop = self.model.predict(df)[0]
 
-        return crop
+        return crop 

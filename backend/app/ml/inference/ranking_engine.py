@@ -1,8 +1,8 @@
 from pathlib import Path
 
+from app.ml.explainability.scheme_explainer import SchemeExplainer
 from app.ml.reinforcement.policy_engine import SchemePolicy
 from app.ml.reinforcement.interaction_logger import log_interaction
-
 from app.ml.rules.rules_engine import RulesEngine
 from app.ml.inference.success_predictor import SchemeSuccessPredictor
 from app.ml.utils.profile_mapper import map_farmer_to_ml_features
@@ -64,17 +64,21 @@ class SchemeRankingEngine:
             # Inject scheme feature
             ml_features["scheme"] = scheme_id.lower()
 
+            # Predict success probability
             probability = self.ml_model.predict_success(ml_features)
+
+            # Generate explanation
+            explanation = SchemeExplainer.explain(features, scheme_id)
 
             ranked_results.append({
                 "scheme_id": scheme_id,
                 "scheme_name": scheme.get("name"),
-                "success_probability": probability
+                "success_probability": probability,
+                "explanation": explanation
             })
 
         # Step 5 — Sort by probability
-        ranked_results = sorted(
-            ranked_results,
+        ranked_results.sort(
             key=lambda x: x["success_probability"],
             reverse=True
         )
