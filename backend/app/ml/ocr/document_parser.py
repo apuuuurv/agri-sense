@@ -5,9 +5,14 @@ class DocumentParser:
 
     def extract_aadhar(self, text: str):
 
-        match = re.search(r"\d{4}\s\d{4}\s\d{4}", text)
+        # remove unwanted characters
+        cleaned_text = re.sub(r"[^\d\s]", "", text)
+
+        # find Aadhaar pattern
+        match = re.search(r"\b\d{4}\s?\d{4}\s?\d{4}\b", cleaned_text)
 
         return match.group() if match else None
+
 
     def extract_pan(self, text: str):
 

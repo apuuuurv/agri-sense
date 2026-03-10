@@ -2,7 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-
+from app.api.documents import router as documents_router
 from app.core.database import connect_to_mongo, close_mongo_connection
 from app.api import farmers  # <-- Import your new API route!
 
@@ -31,6 +31,7 @@ app.add_middleware(
 
 # Attach the farmers router to the main app
 app.include_router(farmers.router, prefix="/api/farmers", tags=["Farmers"])
+app.include_router(documents_router)  # <-- Add the documents router
 
 @app.get("/")
 async def root():
