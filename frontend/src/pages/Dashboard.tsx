@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '@/lib/api.ts';
+import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +21,9 @@ import {
   Tractor,
   User,
   CreditCard,
-  GraduationCap
+  GraduationCap,
+  UploadCloud,
+  FileText
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -31,7 +33,12 @@ export default function Dashboard() {
   const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
 
-  // Expanded Profile Form State mapping to your MongoDB document
+  // Document Upload State
+  const [uploadType, setUploadType] = useState('Aadhar');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+
+  // Profile Form State
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
@@ -40,7 +47,7 @@ export default function Dashboard() {
     gender: '',
     category: '',
     highest_qualification: '',
-    is_differently_abled: 'false', // String for Select component
+    is_differently_abled: 'false',
     state: '',
     district: '',
     pincode: '',
@@ -58,7 +65,7 @@ export default function Dashboard() {
     try {
       const res = await api.get('/farmers/me');
       setFarmer(res.data);
-      // Sync fetched data with form state, handling nulls carefully
+      
       const d = res.data;
       setFormData({
         full_name: d.full_name || '',
@@ -83,7 +90,7 @@ export default function Dashboard() {
       });
     } catch (err) {
       toast.error("Session expired. Please login.");
-      navigate('/auth');
+      // navigate('/auth'); // Uncomment when you have a login page
     }
   };
 
@@ -95,7 +102,6 @@ export default function Dashboard() {
     e.preventDefault();
     setSaving(true);
     try {
-      // Convert strings back to correct types for the backend
       const payload = {
         ...formData,
         age: parseInt(formData.age) || null,
@@ -108,7 +114,7 @@ export default function Dashboard() {
       
       await api.put('/farmers/me', payload);
       toast.success("Profile updated successfully!");
-      fetchProfile(); // Refresh dashboard data
+      fetchProfile(); 
       setActiveTab('home');
     } catch (err) {
       toast.error("Failed to update profile.");
@@ -117,11 +123,45 @@ export default function Dashboard() {
     }
   };
 
+  const handleDocumentUpload = async () => {
+    if (!selectedFile) {
+      toast.error("Please select a file to upload.");
+      return;
+    }
+
+    setUploadingDoc(true);
+    try {
+      const docData = new FormData();
+      // EXACT MATCH: These keys MUST match the parameters in FastAPI's upload.py
+      docData.append('file', selectedFile); 
+      docData.append('doc_type', uploadType); 
+
+      // Calls /api/upload since your main.py has prefix="/api/upload"
+      await api.post('/upload', docData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      toast.success(`${uploadType} uploaded successfully!`);
+      setSelectedFile(null);
+      
+      // Clear the file input visually
+      const fileInput = document.getElementById('document-upload') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+      
+      fetchProfile(); 
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Failed to upload document. Please check console for details.");
+    } finally {
+      setUploadingDoc(false);
+    }
+  };
+
   if (!farmer) return <div className="flex h-screen items-center justify-center font-bold text-emerald-600">Loading AgriSense...</div>;
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
-      {/* --- SIDEBAR --- */}
+      {/* SIDEBAR */}
       <aside className="w-full md:w-64 bg-emerald-950 text-white p-6 flex flex-col border-r border-emerald-900">
         <div className="flex items-center gap-2 mb-10">
           <LayoutDashboard className="text-emerald-400" />
@@ -155,11 +195,11 @@ export default function Dashboard() {
         </Button>
       </aside>
 
-      {/* --- MAIN CONTENT AREA --- */}
+      {/* MAIN CONTENT */}
       <main className="flex-1 p-4 md:p-8 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
           
-          {/* VIEW: DASHBOARD HOME */}
+          {/* HOME TAB */}
           {activeTab === 'home' && (
             <>
               <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -235,7 +275,7 @@ export default function Dashboard() {
             </>
           )}
 
-          {/* VIEW: PROFILE EDITOR */}
+          {/* PROFILE TAB */}
           {activeTab === 'profile' && (
             <div className="space-y-6 pb-12">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
@@ -398,7 +438,6 @@ export default function Dashboard() {
                             <SelectItem value="Small">Small (1-2 Ha)</SelectItem>
                             <SelectItem value="Semi-Medium">Semi-Medium (2-4 Ha)</SelectItem>
                             <SelectItem value="Medium">Medium (4-10 Ha)</SelectItem>
-                            {/* FIXED LINE HERE: Changed > to &gt; */}
                             <SelectItem value="Large">Large (&gt;10 Ha)</SelectItem>
                           </SelectContent>
                         </Select>
@@ -428,6 +467,75 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
                 
+                {/* 5. DOCUMENT UPLOAD (OCR READY) */}
+                <Card className="border-none shadow-sm md:col-span-2 border-t-4 border-t-emerald-500">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <UploadCloud className="h-5 w-5 text-emerald-600"/> 
+                      Document Center
+                    </CardTitle>
+                    <p className="text-sm text-slate-500">
+                      Upload your Aadhar, PAN, or Land Records here. (OCR Auto-fill coming soon!)
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="flex flex-col md:flex-row gap-4 items-end bg-slate-50 p-4 rounded-xl border border-slate-100">
+                      <div className="flex-1 w-full space-y-2">
+                        <Label>Document Type</Label>
+                        <Select value={uploadType} onValueChange={setUploadType}>
+                          <SelectTrigger className="bg-white"><SelectValue placeholder="Select type" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Aadhar">Aadhar Card</SelectItem>
+                            <SelectItem value="PAN">PAN Card</SelectItem>
+                            <SelectItem value="Land_Record">Land Record (7/12, etc.)</SelectItem>
+                            <SelectItem value="Bank_Passbook">Bank Passbook</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex-1 w-full space-y-2">
+                        <Label>Select File (Image or PDF)</Label>
+                        <Input 
+                          id="document-upload"
+                          type="file" 
+                          className="bg-white cursor-pointer" 
+                          accept="image/*,.pdf"
+                          onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} 
+                        />
+                      </div>
+                      <Button 
+                        onClick={handleDocumentUpload} 
+                        disabled={!selectedFile || uploadingDoc} 
+                        className="bg-emerald-600 hover:bg-emerald-700 w-full md:w-auto"
+                      >
+                        {uploadingDoc ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <UploadCloud className="h-4 w-4 mr-2" />}
+                        Upload File
+                      </Button>
+                    </div>
+
+                    <div>
+                      <Label className="mb-3 block text-slate-700 font-bold">Verified Documents on File</Label>
+                      {farmer?.documents_uploaded?.length > 0 ? (
+                        <div className="flex flex-wrap gap-3">
+                          {farmer.documents_uploaded.map((docString: string, idx: number) => {
+                            // Extract just the document type name from "doc_type:path" string format
+                            const docName = typeof docString === 'string' ? docString.split(':')[0] : 'Document'; 
+                            return (
+                              <Badge key={idx} variant="outline" className="px-4 py-2 flex items-center gap-2 bg-emerald-50 border-emerald-200 text-emerald-800 text-sm">
+                                <FileText className="h-4 w-4" /> 
+                                {docName.replace('_', ' ')}
+                              </Badge>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="text-sm text-slate-400 italic bg-white border border-dashed border-slate-200 p-4 rounded-lg text-center">
+                          No documents uploaded yet.
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
               </div>
             </div>
           )}
