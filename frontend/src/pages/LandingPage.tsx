@@ -13,6 +13,7 @@ import {
 
 import DarkVeil from '@/components/DarkVeil';
 import { useTheme } from '@/components/theme-provider';
+import CropShowcase from '@/components/CropShowcase';
 
 // ─── DATA ──────────────────────────────────────────────────────────────────────
 
@@ -244,7 +245,7 @@ export default function LandingPage() {
           </div>
 
           <div className="hidden md:flex gap-7 text-sm font-medium text-slate-600 dark:text-slate-400">
-            {["Features", "Process", "Testimonials", "FAQ"].map((item) => (
+            {["Crops", "Features", "Process", "Testimonials", "FAQ"].map((item) => (
               <a
                 key={item}
                 href={`#${item.toLowerCase()}`}
@@ -396,6 +397,9 @@ export default function LandingPage() {
           </motion.div>
         </div>
       </section>
+
+      {/* ── CROPS SHOWCASE ── */}
+      <CropShowcase />
 
       {/* ── FEATURES ── */}
       <section id="features" className="py-28 px-6 bg-slate-50 dark:bg-[#060a0f]">
