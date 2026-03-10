@@ -2,7 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-
+from app.api.documents import router as documents_router
 from app.core.database import connect_to_mongo, close_mongo_connection
 # Imported the new auth and upload routes here!
 from app.api import farmers, auth, upload  
@@ -33,7 +33,11 @@ app.add_middleware(
 # Attached all three routers to the main app
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(farmers.router, prefix="/api/farmers", tags=["Farmers"])
+<<<<<<< HEAD
 app.include_router(upload.router, prefix="/api/upload", tags=["Documents"])
+=======
+app.include_router(documents_router)  # <-- Add the documents router
+>>>>>>> Gaurav-ML
 
 @app.get("/")
 async def root():

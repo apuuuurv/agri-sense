@@ -1,8 +1,9 @@
-# backend/app/models/farmer.py
-from pydantic import BaseModel, Field, EmailStr
-from typing import Optional, List
+from pydantic import BaseModel
+from typing import List, Optional
+
 
 class FarmerProfile(BaseModel):
+<<<<<<< HEAD
     # Basic Info (Required immediately)
     full_name: str = Field(..., example="Ramesh Kumar")
     email: EmailStr = Field(..., example="ramesh@example.com")
@@ -51,3 +52,30 @@ class FarmerSignup(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+=======
+
+    income: float
+    land_size: float
+    state: str
+    irrigation: str
+    farmer_type: str
+
+    crop: Optional[str] = None
+    temperature: Optional[float] = None
+    rainfall: Optional[float] = None
+    soil: Optional[str] = None
+    season: Optional[str] = None
+
+from typing import List
+
+class SchemeRecommendation(BaseModel):
+    scheme_id: str
+    scheme_name: str
+    success_probability: float
+    explanation: List[str] = []
+
+class FarmerResponse(BaseModel):
+    farmer_id: str
+    message: str
+    recommended_schemes: List[SchemeRecommendation]
+>>>>>>> Gaurav-ML

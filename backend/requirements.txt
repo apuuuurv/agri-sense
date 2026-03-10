@@ -4,7 +4,7 @@ uvicorn>=0.30.0
 pydantic>=2.8.0
 
 # Database
-motor==3.3.2           
+motor==3.3.2
 pymongo==4.6.2
 
 # Machine Learning & Data Science
@@ -12,19 +12,25 @@ lightgbm
 scikit-learn
 pandas
 numpy
+scipy
+joblib
 
 # Computer Vision & OCR
 pytesseract
 Pillow
+opencv-python
 torch
 torchvision
+opencv-python
 
 # Utilities
-python-multipart 
+python-multipart
 python-dotenv
-
 
 passlib
 bcrypt
 PyJWT
 email-validator
+
+# Rule Engine
+pyyaml
