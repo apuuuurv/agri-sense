@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '@/lib/api';
@@ -16,6 +16,12 @@ export default function AuthPage() {
   const [formData, setFormData] = useState({ full_name: '', email: '', password: '' });
   const navigate = useNavigate();
   const { t } = useTranslationText();
+
+  useEffect(() => {
+    if (localStorage.getItem('access_token')) {
+      navigate('/dashboard');
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

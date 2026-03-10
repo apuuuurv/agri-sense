@@ -1,4 +1,12 @@
 # backend/app/main.py
+import os
+import warnings
+
+# Silence noisy ML warnings
+os.environ["LOKY_MAX_CPU_COUNT"] = "4"  # Fix for wmic deprecation on Windows
+warnings.filterwarnings("ignore", category=UserWarning, module="sklearn")
+warnings.filterwarnings("ignore", category=UserWarning, module="joblib")
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
@@ -9,10 +17,10 @@ from app.api import farmers, auth, upload
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("⏳ Starting up the server...")
+    print("Starting up the server...")
     await connect_to_mongo()
     yield
-    print("⏳ Shutting down the server...")
+    print("Shutting down the server...")
     await close_mongo_connection()
 
 app = FastAPI(
@@ -30,14 +38,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Attached all three routers to the main app
+# Attached all routers to the main app
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(farmers.router, prefix="/api/farmers", tags=["Farmers"])
-<<<<<<< HEAD
 app.include_router(upload.router, prefix="/api/upload", tags=["Documents"])
-=======
-app.include_router(documents_router)  # <-- Add the documents router
->>>>>>> Gaurav-ML
+app.include_router(documents_router)
 
 @app.get("/")
 async def root():

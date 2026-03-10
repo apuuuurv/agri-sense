@@ -13,11 +13,9 @@ import {
 
 import DarkVeil from '@/components/DarkVeil';
 import { useTheme } from '@/components/theme-provider';
-<<<<<<< HEAD
 import { useTranslationText } from '@/hooks/useTranslationText';
-=======
 import CropShowcase from '@/components/CropShowcase';
->>>>>>> sahu-model
+import { Sun, Moon } from 'lucide-react';
 
 // ─── DATA & ACCENTS ────────────────────────────────────────────────────────────
 
@@ -74,7 +72,7 @@ function AnimatedCounter({ target, suffix = "", prefix = "" }: { target: number;
 
 // ─── FAQ ITEM ──────────────────────────────────────────────────────────────────
 
-function FAQItem({ q, a }: { q: string; a: string }) {
+function FAQItem({ q, a }: { q: string; a: string; key?: any }) {
   const [open, setOpen] = useState(false);
   return (
     <motion.div
@@ -162,62 +160,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#060a0f] font-sans text-slate-900 dark:text-slate-50 overflow-x-hidden transition-colors duration-300">
-<<<<<<< HEAD
-=======
-
-      {/* ── NAVBAR ── */}
-      <nav className="fixed top-0 w-full z-50 px-4 pt-4">
-        <motion.div
-          initial={{ y: -24, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.6, ease: easeCustom }}
-          className="max-w-7xl mx-auto flex items-center justify-between px-5 py-3 bg-transparent backdrop-blur-md"
-        >
-          <div className="flex items-center gap-2.5 group cursor-pointer">
-            <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 p-1.5 rounded-xl group-hover:scale-110 transition-transform shadow-lg shadow-emerald-500/25">
-              <Leaf className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-lg font-black tracking-[-0.04em] text-emerald-900 dark:text-white">
-              AGRISENSE
-            </span>
-          </div>
-
-          <div className="hidden md:flex gap-7 text-sm font-medium text-slate-600 dark:text-slate-400">
-            {["Crops", "Features", "Process", "Testimonials", "FAQ"].map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase()}`}
-                className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-              >
-                {item}
-              </a>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="h-9 w-9 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950 rounded-xl"
-            >
-              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </Button>
-            <Link to="/auth">
-              <Button variant="ghost" className="h-9 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-white hover:bg-emerald-50 dark:hover:bg-white/8 rounded-xl">
-                Login
-              </Button>
-            </Link>
-            <Link to="/auth">
-              <Button className="h-9 px-5 text-sm bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/25 transition-all hover:scale-105 hover:shadow-emerald-500/40">
-                Get Started
-              </Button>
-            </Link>
-          </div>
-        </motion.div>
-      </nav>
-
->>>>>>> sahu-model
       {/* ── HERO ── */}
       <section className="relative w-full min-h-screen flex items-center justify-center px-6 pt-28 pb-20 overflow-hidden">
 
@@ -283,7 +225,7 @@ export default function LandingPage() {
           </motion.p>
 
           <motion.div variants={fadeUp} className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-14">
-            <Link to="/auth">
+            <Link to={localStorage.getItem('access_token') ? "/dashboard" : "/auth"}>
               <Button className="h-13 px-8 py-4 text-base bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl group transition-all shadow-xl shadow-emerald-500/20 hover:shadow-emerald-500/35 hover:scale-105">
                 {t('common.get_started')}
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />

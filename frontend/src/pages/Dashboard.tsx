@@ -24,7 +24,9 @@ import {
   CreditCard,
   GraduationCap,
   UploadCloud,
-  FileText
+  FileText,
+  Sprout,
+  ArrowRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslationText } from '@/hooks/useTranslationText';
@@ -136,13 +138,21 @@ export default function Dashboard() {
       docData.append('file', selectedFile);
       docData.append('doc_type', uploadType);
 
-      await api.post('/upload', docData, {
+      const res = await api.post('/upload', docData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
-      toast.success(t('dashboard.toast_upload_success', { type: uploadType }));
+      const { ocr_data } = res.data;
+      if (ocr_data && ocr_data.verification_status === "Success") {
+        toast.success(t('dashboard.toast_upload_ocr_success', { 
+          type: uploadType, 
+          id: ocr_data.extracted_id 
+        }) || `Verified ${uploadType}: ${ocr_data.extracted_id}`);
+      } else {
+        toast.success(t('dashboard.toast_upload_success', { type: uploadType }));
+      }
+      
       setSelectedFile(null);
-
       const fileInput = document.getElementById('document-upload') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
 
@@ -220,75 +230,111 @@ export default function Dashboard() {
                     {farmer.land_size_hectares ? (
                       <Badge className="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 px-4 py-1">{t('dashboard.verified_profile')}</Badge>
                     ) : (
-                      <Button size="sm" variant="destructive" onClick={() => setActiveTab('profile')} className="animate-pulse shadow-lg shadow-red-500/20">
+                      <Button size="sm" variant="destructive" onClick={() => navigate('/profile-setup')} className="animate-pulse shadow-lg shadow-red-500/20">
                         <AlertCircle className="mr-2 h-4 w-4" /> {t('dashboard.complete_setup')}
                       </Button>
                     )}
                   </div>
                 </header>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                  <Card className="border border-slate-100 dark:border-slate-800 shadow-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm transition-all hover:shadow-lg">
-                    <CardContent className="pt-6">
-                      <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{t('dashboard.total_land')}</p>
-                      <div className="text-3xl font-black mt-1 text-slate-900 dark:text-white">{farmer.land_size_hectares || 0} Ha</div>
-                      <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mt-2 flex items-center">
-                        <MapPin className="h-3 w-3 mr-1" /> {farmer.district || t('dashboard.location_not_set')}
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border border-slate-100 dark:border-slate-800 shadow-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm transition-all hover:shadow-lg">
-                    <CardContent className="pt-6">
-                      <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{t('dashboard.verification')}</p>
-                      <div className="text-3xl font-black mt-1 text-emerald-600 dark:text-emerald-400">
-                        {farmer.aadhar_number ? t('common.verified') : t('common.pending')}
-                      </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">{t('dashboard.update_to_verify')}</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border-none shadow-lg bg-emerald-600 dark:bg-emerald-700 text-white shadow-emerald-600/20 transition-all hover:scale-[1.02]">
-                    <CardContent className="pt-6">
-                      <p className="text-xs font-bold text-emerald-200 uppercase tracking-widest">{t('dashboard.ai_score')}</p>
-                      <div className="text-4xl font-black mt-1">82%</div>
-                      <div className="flex items-center text-xs mt-2 text-emerald-100">
-                        <TrendingUp className="h-3 w-3 mr-1" /> {t('dashboard.new_matches', { count: 4 })}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-                  <FileCheck className="text-emerald-600 dark:text-emerald-500" /> {t('dashboard.schemes_title')}
-                </h3>
-                <div className="space-y-4">
-                  {[
-                    { name: "PM-Kisan Nidhi", amount: "₹6,000/yr", type: "Direct Transfer", code: "PMK" },
-                    { name: "Crop Insurance (PMFBY)", amount: "95% Cover", type: "Insurance", code: "FBY" }
-                  ].map((scheme, i) => (
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                      key={i}
-                      className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center justify-between group hover:border-emerald-500 dark:hover:border-emerald-500 transition-all cursor-pointer hover:shadow-md"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="bg-emerald-50 dark:bg-emerald-950/50 p-3 rounded-xl text-emerald-600 dark:text-emerald-400 font-bold group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                          {scheme.code}
+                {!farmer.land_size_hectares ? (
+                  <div className="grid grid-cols-1 gap-6 mb-10">
+                    <Card className="border-none shadow-xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-8 md:p-12 rounded-[2rem] relative overflow-hidden">
+                      <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+                      <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 text-center md:text-left">
+                        <div className="bg-white/20 p-6 rounded-[2rem] backdrop-blur-md">
+                          <Sprout className="h-16 w-16 text-white" />
                         </div>
-                        <div>
-                          <h4 className="font-bold text-slate-900 dark:text-white">{scheme.name}</h4>
-                          <p className="text-sm text-slate-500 dark:text-slate-400">{scheme.type} • Benefit: {scheme.amount}</p>
+                        <div className="flex-1">
+                          <h2 className="text-3xl md:text-4xl font-black mb-4">{t('dashboard.setup_title') || "Let's Get Your Farm Started!"}</h2>
+                          <p className="text-emerald-50 text-lg mb-8 max-w-xl opacity-90 leading-relaxed">
+                            {t('dashboard.setup_desc') || "Complete your profile to unlock AI-powered scheme recommendations, crop analysis, and government subsidies tailored for your land."}
+                          </p>
+                          <Button 
+                            className="bg-white text-emerald-900 hover:bg-emerald-50 h-14 px-8 text-lg font-bold rounded-2xl shadow-xl transition-all hover:scale-105 group"
+                            onClick={() => navigate('/profile-setup')}
+                          >
+                            {t('dashboard.start_setup') || "Start Profile Setup"}
+                            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                          </Button>
                         </div>
                       </div>
-                      <Button variant="ghost" className="rounded-full text-slate-600 dark:text-slate-300 group-hover:bg-emerald-600 group-hover:text-white transition-all">
-                        {t('dashboard.apply')} <ChevronRight className="ml-1 h-4 w-4" />
-                      </Button>
-                    </motion.div>
-                  ))}
-                </div>
+                    </Card>
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                      <Card className="border border-slate-100 dark:border-slate-800 shadow-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm transition-all hover:shadow-lg">
+                        <CardContent className="pt-6">
+                          <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{t('dashboard.total_land')}</p>
+                          <div className="text-3xl font-black mt-1 text-slate-900 dark:text-white">{farmer.land_size_hectares || 0} Ha</div>
+                          <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mt-2 flex items-center">
+                            <MapPin className="h-3 w-3 mr-1" /> {farmer.district || t('dashboard.location_not_set')}
+                          </p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="border border-slate-100 dark:border-slate-800 shadow-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm transition-all hover:shadow-lg">
+                        <CardContent className="pt-6">
+                          <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{t('dashboard.verification')}</p>
+                          <div className="text-3xl font-black mt-1 text-emerald-600 dark:text-emerald-400">
+                            {farmer.aadhar_number ? t('common.verified') : t('common.pending')}
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">{t('dashboard.update_to_verify')}</p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="border-none shadow-lg bg-emerald-600 dark:bg-emerald-700 text-white shadow-emerald-600/20 transition-all hover:scale-[1.02]">
+                        <CardContent className="pt-6">
+                          <p className="text-xs font-bold text-emerald-200 uppercase tracking-widest">{t('dashboard.ai_score')}</p>
+                          <div className="text-4xl font-black mt-1">82%</div>
+                          <div className="flex items-center text-xs mt-2 text-emerald-100">
+                            <TrendingUp className="h-3 w-3 mr-1" /> {t('dashboard.new_matches', { count: 4 })}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+                      <FileCheck className="text-emerald-600 dark:text-emerald-500" /> {t('dashboard.schemes_title')}
+                    </h3>
+                    <div className="space-y-4">
+                      {farmer.recommended_schemes && farmer.recommended_schemes.length > 0 ? (
+                        farmer.recommended_schemes.map((scheme: any, i: number) => (
+                          <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            key={scheme.scheme_id}
+                            className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center justify-between group hover:border-emerald-500 dark:hover:border-emerald-500 transition-all cursor-pointer hover:shadow-md"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="bg-emerald-50 dark:bg-emerald-950/50 p-3 rounded-xl text-emerald-600 dark:text-emerald-400 font-bold group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                                {scheme.scheme_id.toString().slice(0, 3).toUpperCase()}
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <h4 className="font-bold text-slate-900 dark:text-white">{scheme.scheme_name}</h4>
+                                  <Badge variant="outline" className="text-[10px] h-5 bg-emerald-50/50 text-emerald-600 border-emerald-200">
+                                    {Math.round(scheme.success_probability * 100)}% Match
+                                  </Badge>
+                                </div>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 line-clamp-1">{scheme.explanation}</p>
+                              </div>
+                            </div>
+                            <Button variant="ghost" className="rounded-full text-slate-600 dark:text-slate-300 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                              {t('dashboard.apply')} <ChevronRight className="ml-1 h-4 w-4" />
+                            </Button>
+                          </motion.div>
+                        ))
+                      ) : (
+                        <div className="text-center py-10 bg-slate-100/50 dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+                          <p className="text-slate-500 dark:text-slate-400 italic">{t('dashboard.no_schemes') || "No recommended schemes found. Complete your profile for better matches."}</p>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
               </motion.div>
             )}
 

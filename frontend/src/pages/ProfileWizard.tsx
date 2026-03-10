@@ -20,26 +20,59 @@ export default function ProfileWizard() {
 
   // State matching your Backend Model
   const [profile, setProfile] = useState({
+    full_name: '',
+    email: '',
     phone_number: '',
     age: '',
     gender: '',
     category: '',
     state: '',
     district: '',
+    annual_income: '',
+    irrigation_type: '',
     land_size_hectares: '',
     farmer_type: '',
     primary_crops: '',
   });
 
+  React.useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await api.get('/farmers/me');
+        setProfile((prev: any) => ({
+          ...prev,
+          full_name: res.data.full_name || '',
+          email: res.data.email || '',
+          phone_number: res.data.phone_number || '',
+          age: res.data.age?.toString() || '',
+          gender: res.data.gender || '',
+          category: res.data.category || '',
+          state: res.data.state || '',
+          district: res.data.district || '',
+          annual_income: res.data.annual_income?.toString() || '',
+          irrigation_type: res.data.irrigation_type || '',
+          land_size_hectares: res.data.land_size_hectares?.toString() || '',
+          farmer_type: res.data.farmer_type || '',
+          primary_crops: res.data.primary_crops?.join(', ') || '',
+        }));
+      } catch (err) {
+        console.error("Failed to fetch profile:", err);
+      }
+    };
+    fetchProfile();
+  }, []);
+
   const updateProfile = async () => {
     setLoading(true);
     try {
-      await api.put('/farmers/me', {
+      const payload = {
         ...profile,
-        age: parseInt(profile.age),
-        land_size_hectares: parseFloat(profile.land_size_hectares),
-        primary_crops: profile.primary_crops.split(',').map(c => c.trim())
-      });
+        age: parseInt(profile.age) || null,
+        annual_income: parseFloat(profile.annual_income) || 0,
+        land_size_hectares: parseFloat(profile.land_size_hectares) || null,
+        primary_crops: profile.primary_crops.split(',').map((c: string) => c.trim()).filter((c: string) => c !== "")
+      };
+      await api.put('/farmers/me', payload);
       toast.success(t('wizard.toast_success'));
       setStep(3); // Move to uploads
     } catch (err: any) {
@@ -58,7 +91,7 @@ export default function ProfileWizard() {
 
     try {
       toast.info(t('common.loading'));
-      await api.post('/upload/', formData);
+      await api.post('/upload', formData);
       toast.success(t('dashboard.toast_upload_success', { type: docType }));
     } catch (err) {
       toast.error(t('dashboard.toast_upload_failed'));
@@ -106,6 +139,22 @@ export default function ProfileWizard() {
                 <div className="space-y-2">
                   <Label>{t('form.age')}</Label>
                   <Input type="number" value={profile.age} onChange={e => setProfile({ ...profile, age: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t('form.income')}</Label>
+                  <Input type="number" placeholder="e.g. 150000" value={profile.annual_income} onChange={e => setProfile({ ...profile, annual_income: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t('form.irrigation')}</Label>
+                  <Select value={profile.irrigation_type} onValueChange={v => setProfile({ ...profile, irrigation_type: v })}>
+                    <SelectTrigger className="bg-white"><SelectValue placeholder={t('common.select')} /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Rainfed">{t('form.irr_rainfed')}</SelectItem>
+                      <SelectItem value="Canal">{t('form.irr_canal')}</SelectItem>
+                      <SelectItem value="Borewell">{t('form.irr_borewell')}</SelectItem>
+                      <SelectItem value="Drip">{t('form.irr_drip')}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>{t('form.state')}</Label>

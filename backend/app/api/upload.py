@@ -41,7 +41,31 @@ async def upload_document(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Could not save file: {str(e)}")
         
-    # 4. Update the Farmer's database record to include this new document!
+    # 4. Run ML OCR Pipeline for verification
+    ocr_data = {}
+    try:
+        from app.ml.ocr.document_pipeline import DocumentPipeline
+        pipeline = DocumentPipeline()
+        ocr_result = pipeline.process_document(file_path)
+        ocr_data = ocr_result
+        
+        # If OCR successfully extracted an ID, we can optionally update the profile
+        update_fields = {}
+        if doc_type.lower() == 'aadhar' and ocr_result.get('aadhar'):
+            update_fields['aadhar_number'] = ocr_result['aadhar']
+        elif doc_type.lower() == 'pan' and ocr_result.get('pan'):
+            update_fields['pan_number'] = ocr_result['pan']
+            
+        if update_fields:
+            await db["farmers"].update_one(
+                {"_id": ObjectId(current_user["_id"])},
+                {"$set": update_fields}
+            )
+    except Exception as e:
+        print(f"⚠️ OCR Processing Error: {str(e)}")
+        ocr_data = {"error": "OCR processing failed", "details": str(e)}
+
+    # 5. Update the Farmer's database record to include this new document!
     document_record = f"{doc_type}:{file_path}"
     
     await db["farmers"].update_one(

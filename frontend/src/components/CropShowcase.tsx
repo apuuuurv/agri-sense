@@ -4,6 +4,7 @@ import { useGLTF, PresentationControls, Environment, PerspectiveCamera, Float, H
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Sprout, Award, Wind, Thermometer, Droplets } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import * as THREE from 'three';
 
 // --- DATA ---
 const cropsData = [
@@ -271,7 +272,14 @@ export default function CropShowcase() {
 
       {/* 3D Canvas */}
       <div className="absolute inset-0 z-10">
-        <Canvas shadows gl={{ antialias: true, alpha: true }}>
+        <Canvas 
+          shadows={{ type: THREE.PCFShadowMap }} 
+          gl={{ 
+            antialias: true, 
+            alpha: true,
+            precision: 'highp'
+          }}
+        >
           <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={35} />
           <ambientLight intensity={0.5} />
           <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={2} castShadow />

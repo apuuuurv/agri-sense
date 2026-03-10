@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Leaf, Sun, Moon } from 'lucide-react';
@@ -9,6 +10,17 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 export function Navbar() {
     const { theme, setTheme } = useTheme();
     const { t } = useTranslationText();
+    const location = useLocation();
+    const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('access_token'));
+
+    useEffect(() => {
+        const checkAuth = () => setIsLoggedIn(!!localStorage.getItem('access_token'));
+        checkAuth(); // Initial check on mount/location change
+        
+        // Listen for storage changes (works across tabs)
+        window.addEventListener('storage', checkAuth);
+        return () => window.removeEventListener('storage', checkAuth);
+    }, [location]);
 
     return (
         <nav className="fixed top-0 w-full z-50 px-4 pt-4 pointer-events-none">
@@ -27,8 +39,6 @@ export function Navbar() {
                     </span>
                 </Link>
 
-                {/* Removed local link scrollings from global navbar as they only work on LandingPage, or we can make them standard Links if needed. 
-            For now, user requested: Navigation links (Features, Process, Testimonials, FAQ) */}
                 <div className="hidden md:flex gap-7 text-sm font-medium text-slate-600 dark:text-slate-400">
                     <Link to="/#features" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                         {t('nav.features') || 'Features'}
@@ -54,16 +64,27 @@ export function Navbar() {
                         {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                     </Button>
                     <LanguageSwitcher />
-                    <Link to="/auth">
-                        <Button variant="ghost" className="h-9 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-white hover:bg-emerald-50 dark:hover:bg-white/5 rounded-xl">
-                            {t('nav.login') || 'Login'}
-                        </Button>
-                    </Link>
-                    <Link to="/auth">
-                        <Button className="h-9 px-5 text-sm bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/25 transition-all hover:scale-105 hover:shadow-emerald-500/40">
-                            {t('nav.get_started') || 'Get Started'}
-                        </Button>
-                    </Link>
+
+                    {isLoggedIn ? (
+                        <Link to="/dashboard">
+                            <Button className="h-9 px-5 text-sm bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/25 transition-all hover:scale-105 hover:shadow-emerald-500/40">
+                                {t('dashboard.title') || 'Dashboard'}
+                            </Button>
+                        </Link>
+                    ) : (
+                        <>
+                            <Link to="/auth">
+                                <Button variant="ghost" className="h-9 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-white hover:bg-emerald-50 dark:hover:bg-white/5 rounded-xl">
+                                    {t('nav.login') || 'Login'}
+                                </Button>
+                            </Link>
+                            <Link to="/auth">
+                                <Button className="h-9 px-5 text-sm bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/25 transition-all hover:scale-105 hover:shadow-emerald-500/40">
+                                    {t('nav.get_started') || 'Get Started'}
+                                </Button>
+                            </Link>
+                        </>
+                    )}
                 </div>
             </motion.div>
         </nav>

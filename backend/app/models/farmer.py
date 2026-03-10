@@ -1,9 +1,15 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional
 
 
+class SchemeRecommendation(BaseModel):
+    scheme_id: str
+    scheme_name: str
+    success_probability: float
+    explanation: List[str] = []
+
+
 class FarmerProfile(BaseModel):
-<<<<<<< HEAD
     # Basic Info (Required immediately)
     full_name: str = Field(..., example="Ramesh Kumar")
     email: EmailStr = Field(..., example="ramesh@example.com")
@@ -34,15 +40,26 @@ class FarmerProfile(BaseModel):
     primary_crops: List[str] = Field(default=[])
     preferred_language: str = Field(default="en", description="User's preferred UI language")
     
+    # ML specific fields
+    crop: Optional[str] = Field(None, example="Rice")
+    temperature: Optional[float] = Field(None, example=28.5)
+    rainfall: Optional[float] = Field(None, example=1200.0)
+    soil: Optional[str] = Field(None, example="Loamy")
+    season: Optional[str] = Field(None, example="Kharif")
+    
     documents_uploaded: List[str] = Field(default=[])
+
 
 class FarmerDB(FarmerProfile):
     hashed_password: str
-    
+
+
 class FarmerResponse(FarmerProfile):
     id: str = Field(..., alias="_id")
+    recommended_schemes: Optional[List[SchemeRecommendation]] = []
 
-# --- NEW AUTH MODELS ---
+
+# --- AUTH MODELS ---
 
 class FarmerSignup(BaseModel):
     # Strictly just the essentials for creating an account
@@ -50,33 +67,7 @@ class FarmerSignup(BaseModel):
     email: EmailStr = Field(..., example="ramesh@example.com")
     password: str = Field(..., example="SecurePassword123!")
 
+
 class Token(BaseModel):
     access_token: str
     token_type: str
-=======
-
-    income: float
-    land_size: float
-    state: str
-    irrigation: str
-    farmer_type: str
-
-    crop: Optional[str] = None
-    temperature: Optional[float] = None
-    rainfall: Optional[float] = None
-    soil: Optional[str] = None
-    season: Optional[str] = None
-
-from typing import List
-
-class SchemeRecommendation(BaseModel):
-    scheme_id: str
-    scheme_name: str
-    success_probability: float
-    explanation: List[str] = []
-
-class FarmerResponse(BaseModel):
-    farmer_id: str
-    message: str
-    recommended_schemes: List[SchemeRecommendation]
->>>>>>> Gaurav-ML

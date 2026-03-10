@@ -14,11 +14,12 @@ farmer = {
     "category": "obc"
 }
 
-results = engine.rank_schemes(farmer)
+results_dict = engine.rank_schemes(farmer)
+ranked_schemes = results_dict["ranked_schemes"]
 
 print("\n===== AI Recommendation Results =====\n")
 
-for scheme in results:
+for scheme in ranked_schemes:
     print(f"Scheme: {scheme['scheme_id']}")
     print(f"Name: {scheme['scheme_name']}")
     print(f"Success Probability: {round(scheme['success_probability'], 3)}")
