@@ -4,6 +4,7 @@ import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
 import ProfileWizard from './pages/ProfileWizard';
 import Dashboard from './pages/Dashboard';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Navbar } from "@/components/Navbar";
@@ -23,8 +24,16 @@ function App() {
           <Route path="/auth" element={<AuthPage />} />
 
           {/* Farmer Workflow Routes */}
-          <Route path="/profile-setup" element={<ProfileWizard />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile-setup" element={
+            <ProtectedRoute requireProfile={false}>
+              <ProfileWizard />
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard" element={
+            <ProtectedRoute requireProfile={true}>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
 
           {/* Catch-all: Redirect to Landing */}
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -62,6 +62,10 @@ export default function Dashboard() {
     land_size_hectares: '',
     farmer_type: '',
     irrigation_type: '',
+    soil_type: '',
+    crop_season: '',
+    water_source: '',
+    land_ownership: '',
     primary_crops: '',
   });
 
@@ -90,6 +94,10 @@ export default function Dashboard() {
         land_size_hectares: d.land_size_hectares?.toString() || '',
         farmer_type: d.farmer_type || '',
         irrigation_type: d.irrigation_type || '',
+        soil_type: d.soil_type || '',
+        crop_season: d.crop_season || '',
+        water_source: d.water_source || '',
+        land_ownership: d.land_ownership || '',
         primary_crops: d.primary_crops?.join(', ') || '',
       });
     } catch (err) {
@@ -463,12 +471,56 @@ export default function Dashboard() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="grid gap-2">
-                        <Label className="text-slate-700 dark:text-slate-300">{t('form.aadhar')}</Label>
-                        <Input value={formData.aadhar_number} onChange={e => setFormData({ ...formData, aadhar_number: e.target.value })} placeholder="12-digit number" className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 dark:text-white" />
+                        <Label className="flex items-center justify-between text-slate-700 dark:text-slate-300">
+                          {t('form.aadhar')}
+                          {farmer.is_aadhar_verified ? (
+                            <Badge variant="outline" className="text-[10px] h-5 bg-emerald-50 text-emerald-600 border-emerald-200">
+                              {t('dashboard.verified')}
+                            </Badge>
+                          ) : formData.aadhar_number?.length === 12 && (
+                            <Badge variant="outline" className="text-[10px] h-5 bg-amber-50 text-amber-600 border-amber-200">
+                              {t('dashboard.unverified')}
+                            </Badge>
+                          )}
+                        </Label>
+                        <Input 
+                          value={formData.aadhar_number} 
+                          onChange={e => {
+                            const val = e.target.value.replace(/\D/g, '').slice(0, 12);
+                            setFormData({ ...formData, aadhar_number: val });
+                          }} 
+                          placeholder="12-digit number" 
+                          className={`bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 dark:text-white ${formData.aadhar_number?.length > 0 && formData.aadhar_number?.length !== 12 ? 'border-red-500 focus-visible:ring-red-500' : ''}`} 
+                        />
+                        {formData.aadhar_number?.length > 0 && formData.aadhar_number?.length !== 12 && (
+                          <p className="text-[10px] text-red-500 mt-[-4px]">Aadhaar must be 12 digits</p>
+                        )}
                       </div>
                       <div className="grid gap-2">
-                        <Label className="text-slate-700 dark:text-slate-300">{t('form.pan')}</Label>
-                        <Input value={formData.pan_number} onChange={e => setFormData({ ...formData, pan_number: e.target.value })} placeholder="ABCDE1234F" className="uppercase bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 dark:text-white" />
+                        <Label className="flex items-center justify-between text-slate-700 dark:text-slate-300">
+                          {t('form.pan')}
+                          {farmer.is_pan_verified ? (
+                            <Badge variant="outline" className="text-[10px] h-5 bg-emerald-50 text-emerald-600 border-emerald-200">
+                              {t('dashboard.verified')}
+                            </Badge>
+                          ) : /^[A-Z]{5}[0-9]{4}[A-Z]$/.test(formData.pan_number) && (
+                            <Badge variant="outline" className="text-[10px] h-5 bg-amber-50 text-amber-600 border-amber-200">
+                              {t('dashboard.unverified')}
+                            </Badge>
+                          )}
+                        </Label>
+                        <Input 
+                          value={formData.pan_number} 
+                          onChange={e => {
+                            const val = e.target.value.toUpperCase().slice(0, 10);
+                            setFormData({ ...formData, pan_number: val });
+                          }} 
+                          placeholder="ABCDE1234F" 
+                          className={`uppercase bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 dark:text-white ${formData.pan_number?.length > 0 && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(formData.pan_number) ? 'border-red-500 focus-visible:ring-red-500' : ''}`} 
+                        />
+                        {formData.pan_number?.length > 0 && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(formData.pan_number) && (
+                          <p className="text-[10px] text-red-500 mt-[-4px]">Invalid PAN format</p>
+                        )}
                       </div>
                       <div className="grid gap-2">
                         <Label className="text-slate-700 dark:text-slate-300">{t('form.income')}</Label>
@@ -511,15 +563,69 @@ export default function Dashboard() {
                           </Select>
                         </div>
                       </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label className="text-slate-700 dark:text-slate-300">{t('form.irrigation')}</Label>
+                          <Select value={formData.irrigation_type} onValueChange={v => setFormData({ ...formData, irrigation_type: v })}>
+                            <SelectTrigger className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 dark:text-white"><SelectValue placeholder={t('common.select')} /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Rainfed">{t('form.irr_rainfed')}</SelectItem>
+                              <SelectItem value="Canal">{t('form.irr_canal')}</SelectItem>
+                              <SelectItem value="Borewell">{t('form.irr_borewell')}</SelectItem>
+                              <SelectItem value="Drip">{t('form.irr_drip')}</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid gap-2">
+                          <Label className="text-slate-700 dark:text-slate-300">{t('form.soil_type')}</Label>
+                          <Select value={formData.soil_type} onValueChange={v => setFormData({ ...formData, soil_type: v })}>
+                            <SelectTrigger className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 dark:text-white"><SelectValue placeholder={t('common.select')} /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Alluvial">{t('form.soil_alluvial')}</SelectItem>
+                              <SelectItem value="Black">{t('form.soil_black')}</SelectItem>
+                              <SelectItem value="Red">{t('form.soil_red')}</SelectItem>
+                              <SelectItem value="Laterite">{t('form.soil_laterite')}</SelectItem>
+                              <SelectItem value="Desert">{t('form.soil_desert')}</SelectItem>
+                              <SelectItem value="Mountain">{t('form.soil_mountain')}</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label className="text-slate-700 dark:text-slate-300">{t('form.crop_season')}</Label>
+                          <Select value={formData.crop_season} onValueChange={v => setFormData({ ...formData, crop_season: v })}>
+                            <SelectTrigger className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 dark:text-white"><SelectValue placeholder={t('common.select')} /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Kharif">{t('form.season_kharif')}</SelectItem>
+                              <SelectItem value="Rabi">{t('form.season_rabi')}</SelectItem>
+                              <SelectItem value="Zaid">{t('form.season_zaid')}</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid gap-2">
+                          <Label className="text-slate-700 dark:text-slate-300">{t('form.water_source')}</Label>
+                          <Select value={formData.water_source} onValueChange={v => setFormData({ ...formData, water_source: v })}>
+                            <SelectTrigger className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 dark:text-white"><SelectValue placeholder={t('common.select')} /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Well">{t('form.water_well')}</SelectItem>
+                              <SelectItem value="Canal">{t('form.water_canal')}</SelectItem>
+                              <SelectItem value="Rain">{t('form.water_rain')}</SelectItem>
+                              <SelectItem value="River">{t('form.water_river')}</SelectItem>
+                              <SelectItem value="Borewell">{t('form.water_borewell')}</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
                       <div className="grid gap-2">
-                        <Label className="text-slate-700 dark:text-slate-300">{t('form.irrigation')}</Label>
-                        <Select value={formData.irrigation_type} onValueChange={v => setFormData({ ...formData, irrigation_type: v })}>
+                        <Label className="text-slate-700 dark:text-slate-300">{t('form.land_ownership')}</Label>
+                        <Select value={formData.land_ownership} onValueChange={v => setFormData({ ...formData, land_ownership: v })}>
                           <SelectTrigger className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 dark:text-white"><SelectValue placeholder={t('common.select')} /></SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Rainfed">{t('form.irr_rainfed')}</SelectItem>
-                            <SelectItem value="Canal">{t('form.irr_canal')}</SelectItem>
-                            <SelectItem value="Borewell">{t('form.irr_borewell')}</SelectItem>
-                            <SelectItem value="Drip">{t('form.irr_drip')}</SelectItem>
+                            <SelectItem value="Owned">{t('form.own_owned')}</SelectItem>
+                            <SelectItem value="Leased">{t('form.own_leased')}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>

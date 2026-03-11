@@ -376,7 +376,14 @@
     "step_verification": "Verification",
     "step_x_of_y": "Step {{current}} of {{total}}",
     "subtitle": "This information helps our AI find the best schemes for you.",
-    "toast_success": "Profile details saved!"
+    "toast_success": "Profile details saved!",
+    "verifying": "Verifying Document...",
+    "verified_success": "Verification Successful ✅",
+    "verified_error": "Verification Failed ❌ Please re-upload.",
+    "kyc_gate_title": "Identity Verification",
+    "kyc_gate_desc": "Upload your Aadhaar and PAN cards for automatic verification. This is mandatory to ensure security and eligibility.",
+    "step_4": "Success",
+    "finish_setup": "Finish Setup"
   },
   "dashboard": {
     "nav_home": "Home",
@@ -405,7 +412,10 @@
     "identity_fin": "Identity & Financials",
     "agri_details": "Agricultural Details",
     "doc_center": "Document Center",
-    "doc_desc": "Upload your Aadhar, PAN, or Land Records here. (OCR Auto-fill coming soon!)"
+    "doc_desc": "Upload your Aadhar, PAN, or Land Records here. (OCR Auto-fill coming soon!)",
+    "verified": "Verified",
+    "unverified": "Unverified",
+    "kyc_status": "KYC Status"
   },
   "form": {
     "phone": "Phone Number",
@@ -465,7 +475,27 @@
     "irr_borewell": "Borewell / Tube well",
     "irr_rainfed": "Rainfed / Unirrigated",
     "type_semimedium": "Semi-Medium (2-4 Ha)",
-    "upload_btn": "Upload File"
+    "upload_btn": "Upload File",
+    "soil_type": "Soil Type",
+    "soil_alluvial": "Alluvial",
+    "soil_black": "Black / Regur",
+    "soil_red": "Red",
+    "soil_laterite": "Laterite",
+    "soil_desert": "Desert / Arid",
+    "soil_mountain": "Mountain / Forest",
+    "crop_season": "Primary Crop Season",
+    "season_kharif": "Kharif (Monsoon)",
+    "season_rabi": "Rabi (Winter)",
+    "season_zaid": "Zaid (Summer)",
+    "water_source": "Primary Water Source",
+    "water_well": "Well",
+    "water_canal": "Canal",
+    "water_rain": "Rainwater",
+    "water_river": "River / Stream",
+    "water_borewell": "Borewell",
+    "land_ownership": "Land Ownership",
+    "own_owned": "Owned",
+    "own_leased": "Leased / Rented"
   },
   "login": "Login"
 }

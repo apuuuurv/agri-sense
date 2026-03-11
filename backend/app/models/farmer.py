@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, field_validator
 from typing import List, Optional
+import re
 
 
 class SchemeRecommendation(BaseModel):
@@ -30,6 +31,8 @@ class FarmerProfile(BaseModel):
     # Identity & Financial
     aadhar_number: Optional[str] = Field(None, example="123456789012")
     pan_number: Optional[str] = Field(None, example="ABCDE1234F")
+    is_aadhar_verified: bool = Field(default=False)
+    is_pan_verified: bool = Field(default=False)
     annual_income: Optional[float] = Field(None, example=60000.0)
     bank_account_linked: Optional[bool] = Field(default=False)
     
@@ -37,6 +40,10 @@ class FarmerProfile(BaseModel):
     land_size_hectares: Optional[float] = Field(None, example=1.5)
     farmer_type: Optional[str] = Field(None, example="Small")
     irrigation_type: Optional[str] = Field(None, example="Rainfed")
+    soil_type: Optional[str] = Field(None, example="Alluvial")
+    crop_season: Optional[str] = Field(None, example="Kharif")
+    water_source: Optional[str] = Field(None, example="Well")
+    land_ownership: Optional[str] = Field(None, example="Owned")
     primary_crops: List[str] = Field(default=[])
     preferred_language: str = Field(default="en", description="User's preferred UI language")
     
@@ -48,6 +55,27 @@ class FarmerProfile(BaseModel):
     season: Optional[str] = Field(None, example="Kharif")
     
     documents_uploaded: List[str] = Field(default=[])
+
+    @field_validator("aadhar_number")
+    @classmethod
+    def validate_aadhar(cls, v: Optional[str]) -> Optional[str]:
+        if v is None or v == "":
+            return v
+        # Remove spaces
+        v = v.replace(" ", "")
+        if not re.match(r"^\d{12}$", v):
+            raise ValueError("Aadhaar number must be exactly 12 digits")
+        return v
+
+    @field_validator("pan_number")
+    @classmethod
+    def validate_pan(cls, v: Optional[str]) -> Optional[str]:
+        if v is None or v == "":
+            return v
+        v = v.upper()
+        if not re.match(r"^[A-Z]{5}[0-9]{4}[A-Z]$", v):
+            raise ValueError("Invalid PAN card format (e.g., ABCDE1234F)")
+        return v
 
 
 class FarmerDB(FarmerProfile):
