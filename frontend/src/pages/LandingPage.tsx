@@ -13,11 +13,12 @@ import {
 
 import DarkVeil from '@/components/DarkVeil';
 import { useTheme } from '@/components/theme-provider';
-<<<<<<< HEAD
+
 import { useTranslationText } from '@/hooks/useTranslationText';
-=======
+
 import CropShowcase from '@/components/CropShowcase';
->>>>>>> sahu-model
+
+import { Sun, Moon, Menu, ChevronRight } from "lucide-react";
 
 // ─── DATA & ACCENTS ────────────────────────────────────────────────────────────
 
@@ -112,7 +113,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 // ─── MAIN COMPONENT ────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
-  const { theme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const { t } = useTranslationText();
 
   const features = [
@@ -162,8 +163,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#060a0f] font-sans text-slate-900 dark:text-slate-50 overflow-x-hidden transition-colors duration-300">
-<<<<<<< HEAD
-=======
+
 
       {/* ── NAVBAR ── */}
       <nav className="fixed top-0 w-full z-50 px-4 pt-4">
@@ -217,7 +217,7 @@ export default function LandingPage() {
         </motion.div>
       </nav>
 
->>>>>>> sahu-model
+
       {/* ── HERO ── */}
       <section className="relative w-full min-h-screen flex items-center justify-center px-6 pt-28 pb-20 overflow-hidden">
 

@@ -3,7 +3,7 @@ import axios from "axios";
 
 // Create an Axios instance pointing to your FastAPI backend
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000/api", // Your backend URL
+  baseURL: "http://127.0.0.1:8999/api", // Your backend URL
 });
 
 // Add a request interceptor to attach the JWT token

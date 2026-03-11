@@ -24,7 +24,24 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"], 
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:5175",
+        "http://localhost:5176",
+        "http://localhost:5177",
+        "http://localhost:5178",
+        "http://localhost:5179",
+        "http://localhost:5180",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
+        "http://127.0.0.1:5175",
+        "http://127.0.0.1:5176",
+        "http://127.0.0.1:5177",
+        "http://127.0.0.1:5178",
+        "http://127.0.0.1:5179",
+        "http://127.0.0.1:5180",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -33,11 +50,8 @@ app.add_middleware(
 # Attached all three routers to the main app
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(farmers.router, prefix="/api/farmers", tags=["Farmers"])
-<<<<<<< HEAD
 app.include_router(upload.router, prefix="/api/upload", tags=["Documents"])
-=======
 app.include_router(documents_router)  # <-- Add the documents router
->>>>>>> Gaurav-ML
 
 @app.get("/")
 async def root():
