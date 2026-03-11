@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,7 @@ export function Navbar() {
     useEffect(() => {
         const checkAuth = () => setIsLoggedIn(!!localStorage.getItem('access_token'));
         checkAuth(); // Initial check on mount/location change
-        
+
         // Listen for storage changes (works across tabs)
         window.addEventListener('storage', checkAuth);
         return () => window.removeEventListener('storage', checkAuth);
@@ -48,6 +48,9 @@ export function Navbar() {
                     </Link>
                     <Link to="/#testimonials" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                         {t('nav.testimonials') || 'Testimonials'}
+                    </Link>
+                    <Link to="/community" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors font-bold text-emerald-700 dark:text-emerald-300">
+                        Community
                     </Link>
                     <Link to="/#faq" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                         {t('nav.faq') || 'FAQ'}

@@ -4,6 +4,7 @@ import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
 import ProfileWizard from './pages/ProfileWizard';
 import Dashboard from './pages/Dashboard';
+import CommunityHub from './pages/CommunityHub';
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Navbar } from "@/components/Navbar";
@@ -21,6 +22,7 @@ function App() {
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/community" element={<CommunityHub />} />
 
           {/* Farmer Workflow Routes */}
           <Route path="/profile-setup" element={<ProfileWizard />} />

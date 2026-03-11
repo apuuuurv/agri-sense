@@ -26,7 +26,7 @@ async def get_my_profile(current_user: dict = Depends(get_current_user)):
         recommendations = RecommendationService.get_recommendations(farmer)
         farmer["recommended_schemes"] = recommendations
     except Exception as e:
-        print(f"⚠️ Recommendation Error: {str(e)}")
+        print(f"⚠️f Recommendation Error: {str(e)}")
         farmer["recommended_schemes"] = []
         
     return farmer
@@ -129,4 +129,4 @@ async def get_all_farmers():
         farmer["_id"] = str(farmer["_id"])
         # We don't generate recommendations for all in the list view for performance
         farmers.append(farmer)
-    return farmers
+    return farmers

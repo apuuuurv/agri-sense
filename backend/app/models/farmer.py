@@ -28,6 +28,7 @@ class FarmerProfile(BaseModel):
     pincode: Optional[str] = Field(None, example="411001")
     
     # Identity & Financial
+    is_verified: Optional[bool] = Field(default=False, description="Whether the farmer is verified to post stories")
     aadhar_number: Optional[str] = Field(None, example="123456789012")
     pan_number: Optional[str] = Field(None, example="ABCDE1234F")
     annual_income: Optional[float] = Field(None, example=60000.0)

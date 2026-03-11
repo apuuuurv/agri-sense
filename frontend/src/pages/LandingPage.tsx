@@ -15,7 +15,7 @@ import DarkVeil from '@/components/DarkVeil';
 import { useTheme } from '@/components/theme-provider';
 import { useTranslationText } from '@/hooks/useTranslationText';
 import CropShowcase from '@/components/CropShowcase';
-import { Sun, Moon } from 'lucide-react';
+import api from '@/lib/api';
 
 // ─── DATA & ACCENTS ────────────────────────────────────────────────────────────
 
@@ -129,11 +129,39 @@ export default function LandingPage() {
     { value: 95, suffix: "%", label: t('stats.3.label'), icon: <Award className="h-5 w-5" /> },
   ];
 
-  const testimonials = [
-    { name: t('testimonials.list.0.name'), state: t('testimonials.list.0.state'), role: t('testimonials.list.0.role'), quote: t('testimonials.list.0.quote'), avatar: "RP", color: "from-emerald-500 to-teal-600" },
-    { name: t('testimonials.list.1.name'), state: t('testimonials.list.1.state'), role: t('testimonials.list.1.role'), quote: t('testimonials.list.1.quote'), avatar: "KD", color: "from-blue-500 to-indigo-600" },
-    { name: t('testimonials.list.2.name'), state: t('testimonials.list.2.state'), role: t('testimonials.list.2.role'), quote: t('testimonials.list.2.quote'), avatar: "GS", color: "from-amber-500 to-orange-600" },
-  ];
+  const [testimonials, setTestimonials] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchTopStories = async () => {
+      try {
+        const response = await api.get('/stories/top?limit=3');
+        // If the database is empty, provide some fallback mock data
+        if (response.data.length === 0) {
+          setTestimonials([
+            { farmer_name: t('testimonials.list.0.name'), location_state: t('testimonials.list.0.state'), crop_type: t('testimonials.list.0.role'), content: t('testimonials.list.0.quote'), avatar: "RP", color: "from-emerald-500 to-teal-600" },
+            { farmer_name: t('testimonials.list.1.name'), location_state: t('testimonials.list.1.state'), crop_type: t('testimonials.list.1.role'), content: t('testimonials.list.1.quote'), avatar: "KD", color: "from-blue-500 to-indigo-600" },
+            { farmer_name: t('testimonials.list.2.name'), location_state: t('testimonials.list.2.state'), crop_type: t('testimonials.list.2.role'), content: t('testimonials.list.2.quote'), avatar: "GS", color: "from-amber-500 to-orange-600" }
+          ]);
+        } else {
+          setTestimonials(response.data.map((story: any, index: number) => {
+            const colors = [
+              "from-emerald-500 to-teal-600",
+              "from-blue-500 to-indigo-600",
+              "from-amber-500 to-orange-600"
+            ];
+            return {
+              ...story,
+              avatar: story.farmer_name.substring(0, 2).toUpperCase(),
+              color: colors[index % colors.length]
+            }
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching top stories:", error);
+      }
+    };
+    fetchTopStories();
+  }, [t]);
 
   const faqs = [
     { q: t('faq.list.0.q'), a: t('faq.list.0.a') },
@@ -470,21 +498,28 @@ export default function LandingPage() {
                       <Star key={s} className="h-4 w-4 fill-amber-400 text-amber-400" />
                     ))}
                   </div>
-                  <p className="text-slate-700 dark:text-slate-300 leading-relaxed text-sm mb-6 flex-1">
-                    "{t.quote}"
+                  <p className="text-slate-700 dark:text-slate-300 leading-relaxed text-sm mb-6 flex-1 line-clamp-4">
+                    "{t.content}"
                   </p>
                   <div className="flex items-center gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                     <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${t.color} flex items-center justify-center text-white text-xs font-black shrink-0`}>
                       {t.avatar}
                     </div>
                     <div>
-                      <div className="font-bold text-slate-900 dark:text-white text-sm">{t.name}</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-500">{t.role} · {t.state}</div>
+                      <div className="font-bold text-slate-900 dark:text-white text-sm">{t.farmer_name}</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-500">{t.crop_type} · {t.location_state}</div>
                     </div>
                   </div>
                 </div>
               </motion.div>
             ))}
+          </motion.div>
+          <motion.div variants={fadeUp} className="mt-12 text-center">
+            <Link to="/community">
+              <Button variant="outline" className="border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
+                Explore Community Hub <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </Link>
           </motion.div>
         </div>
       </section>
