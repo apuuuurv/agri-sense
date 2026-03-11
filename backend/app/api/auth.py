@@ -14,8 +14,9 @@ router = APIRouter()
 async def signup(user_data: FarmerSignup):
     db = get_db()
     
-    # 1. Check if email already exists
-    existing_user = await db["farmers"].find_one({"email": user_data.email})
+    # 1. Check if email already exists (normalized to lowercase)
+    email_normalized = user_data.email.lower()
+    existing_user = await db["farmers"].find_one({"email": email_normalized})
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
@@ -25,7 +26,7 @@ async def signup(user_data: FarmerSignup):
     # 3. Prepare minimal data for Database
     farmer_dict = {
         "full_name": user_data.full_name,
-        "email": user_data.email,
+        "email": email_normalized,
         "hashed_password": hashed_pwd,
         # Default empty lists/booleans for when they fill it out later
         "primary_crops": [],
@@ -47,7 +48,9 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     db = get_db()
     
     # In FastAPI OAuth2, the 'username' field will now hold our EMAIL
-    user = await db["farmers"].find_one({"email": form_data.username})
+    # Normalize to lowercase for case-insensitive lookup
+    email_normalized = form_data.username.lower()
+    user = await db["farmers"].find_one({"email": email_normalized})
     
     if not user or not verify_password(form_data.password, user["hashed_password"]):
         raise HTTPException(

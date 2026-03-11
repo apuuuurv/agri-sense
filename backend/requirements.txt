@@ -34,3 +34,7 @@ email-validator
 
 # Rule Engine
 pyyaml
+
+# Auth & Security
+cryptography
+python-jose[cryptography]
